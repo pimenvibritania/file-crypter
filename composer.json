@@ -1,6 +1,6 @@
 {
-    "name": "pimenvibritania/file-crypyter",
-    "description": "Encrypt and decrypt files of any size in your Laravel project",
+    "name": "pimenvibritania/file-crypter",
+    "description": "Encrypt and decrypt any files of any size in your PHP (Laravel) project",
     "keywords": [
         "laravel", "encrypt", "decrypt", "encryption", "decryption",
         "cbc", "php", "file", "file-crypter"
