@@ -1,0 +1,43 @@
+{
+    "name": "pimenvibritania/file-crypyter",
+    "description": "Encrypt and decrypt files of any size in your Laravel project",
+    "keywords": [
+        "laravel", "encrypt", "decrypt", "encryption", "decryption",
+        "cbc", "php", "file", "file-crypter"
+    ],
+    "homepage": "https://github.com/pimenvibritania/file-crypter",
+    "type": "library",
+    "authors": [
+        {
+            "name": "pimenvibritania",
+            "email": "pimenvibritania@gmail.com",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^7.1",
+        "illuminate/support": "5.8.* || 6.*.* || ^7.0"
+    },
+    "require-dev": {
+        "orchestra/testbench": "3.8.*",
+        "phpro/grumphp": "^0.22.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "pimenvibritania\\FileCrypter\\": "src"
+        }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "pimenvibritania\\FileCrypter\\FileCrypterServiceProvider"
+            ],
+            "aliases": {
+                "FileCrypter": "FileCrypter"
+            }
+        }
+    }
+}
