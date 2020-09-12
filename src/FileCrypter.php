@@ -5,6 +5,10 @@ namespace pimenvibritania\FileCrypter;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
+/**
+ * Class FileCrypter
+ * @package pimenvibritania\FileCrypter
+ */
 class FileCrypter
 {
     /**
@@ -20,6 +24,9 @@ class FileCrypter
      * @var string
      */
     protected $key;
+    /**
+     * @var
+     */
     protected $salt;
 
     /**
@@ -28,6 +35,9 @@ class FileCrypter
      * @var string
      */
     protected $cipherAES;
+    /**
+     * @var
+     */
     protected $chiperBF;
 
     /**
@@ -37,6 +47,9 @@ class FileCrypter
      */
     protected $adapter;
 
+    /**
+     * FileCrypter constructor.
+     */
     public function __construct()
     {
         $this->disk = config('file-crypter.disk');
@@ -46,8 +59,6 @@ class FileCrypter
         $this->cipherBF = config('file-crypter.cipher-bf');
 
     }
-
-
 
     /**
      * Set the disk where the files are located.
@@ -113,6 +124,11 @@ class FileCrypter
         return $this;
     }
 
+    /**
+     * @param $sourceFile
+     * @param null $destFile
+     * @return $this
+     */
     public function encryptCopy($sourceFile, $destFile = null)
     {
         return self::encrypt($sourceFile, $destFile, false);
@@ -150,11 +166,21 @@ class FileCrypter
         return $this;
     }
 
+    /**
+     * @param $sourceFile
+     * @param null $destFile
+     * @return $this
+     */
     public function decryptCopy($sourceFile, $destFile = null)
     {
         return self::decrypt($sourceFile, $destFile, false);
     }
 
+    /**
+     * @param $sourceFile
+     * @return bool
+     * @throws \Exception
+     */
     public function streamDecrypt($sourceFile)
     {
         $this->registerServices();
@@ -167,6 +193,10 @@ class FileCrypter
         return $encrypter->decrypt($sourcePath, 'php://output');
     }
 
+    /**
+     * @param $file
+     * @return string
+     */
     protected function getFilePath($file)
     {
         if ($this->isS3File()) {
@@ -176,11 +206,17 @@ class FileCrypter
         return Storage::disk($this->disk)->path($file);
     }
 
+    /**
+     * @return bool
+     */
     protected function isS3File()
     {
         return $this->disk == 's3';
     }
 
+    /**
+     *
+     */
     protected function setAdapter()
     {
         if ($this->adapter) {
@@ -190,6 +226,9 @@ class FileCrypter
         $this->adapter = Storage::disk($this->disk)->getAdapter();
     }
 
+    /**
+     *
+     */
     protected function registerServices()
     {
         $this->setAdapter();

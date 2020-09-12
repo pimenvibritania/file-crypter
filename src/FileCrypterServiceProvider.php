@@ -4,6 +4,10 @@ namespace pimenvibritania\FileCrypter;
 
 use Illuminate\Support\ServiceProvider;
 
+/**
+ * Class FileCrypterServiceProvider
+ * @package pimenvibritania\FileCrypter
+ */
 class FileCrypterServiceProvider extends ServiceProvider
 {
     /**

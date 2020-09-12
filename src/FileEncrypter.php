@@ -10,6 +10,10 @@ use Illuminate\Support\Str;
 use RuntimeException;
 use pimenvibritania\HashStretcher\Hasher;
 
+/**
+ * Class FileEncrypter
+ * @package pimenvibritania\FileCrypter
+ */
 class FileEncrypter
 {
     /**
@@ -31,6 +35,9 @@ class FileEncrypter
      * @var string
      */
     protected $cipherAES;
+    /**
+     * @var
+     */
     protected $cipherBF;
 
     /**
@@ -151,6 +158,7 @@ class FileEncrypter
         $numberOfChunks = ceil((filesize($sourcePath) - 16) / (16 * (self::FILE_ENCRYPTION_BLOCKS + 1)));
         $i = 0;
         while (! feof($fpIn)) {
+
             // We have to read one block more for decrypting than for encrypting because of the initialization vector
             $ciphertext = fread($fpIn, 16 * (self::FILE_ENCRYPTION_BLOCKS + 1));
             $plaintext = openssl_decrypt($ciphertext, $this->cipherAES, $this->key, OPENSSL_RAW_DATA, $iv);
@@ -183,6 +191,11 @@ class FileEncrypter
         return true;
     }
 
+    /**
+     * @param $destPath
+     * @return false|resource
+     * @throws Exception
+     */
     protected function openDestFile($destPath)
     {
         if (($fpOut = fopen($destPath, 'w')) === false) {
@@ -192,6 +205,11 @@ class FileEncrypter
         return $fpOut;
     }
 
+    /**
+     * @param $sourcePath
+     * @return false|resource
+     * @throws Exception
+     */
     protected function openSourceFile($sourcePath)
     {
         $contextOpts = Str::startsWith($sourcePath, 's3://') ? ['s3' => ['seekable' => true]] : [];
