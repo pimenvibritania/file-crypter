@@ -11,7 +11,7 @@ With this package, you can encrypt and decrypt any files with AES & Blowfish enc
 composer require pimenvibritania/hash-stretcher
 ```
 
-> You can Install this package via composer  :
+##### You can Install this package via composer  :
  ```bash
  composer require pimenvibritania/file-crypter
 ```
