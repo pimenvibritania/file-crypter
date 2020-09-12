@@ -20,13 +20,15 @@ class FileCrypter
      * @var string
      */
     protected $key;
+    protected $salt;
 
     /**
      * The algorithm used for encryption.
      *
      * @var string
      */
-    protected $cipher;
+    protected $cipherAES;
+    protected $chiperBF;
 
     /**
      * The storage adapter.
@@ -39,8 +41,13 @@ class FileCrypter
     {
         $this->disk = config('file-crypter.disk');
         $this->key = config('file-crypter.key');
-        $this->cipher = config('file-crypter.cipher');
+        $this->salt = config('file-crypter.salt');
+        $this->cipherAES = config('file-crypter.cipher-aes');
+        $this->cipherBF = config('file-crypter.cipher-bf');
+
     }
+
+
 
     /**
      * Set the disk where the files are located.
@@ -69,15 +76,14 @@ class FileCrypter
     }
 
     /**
-     * Create a new encryption key for the given cipher.
-     *
-     * @return string
+     * @return \Illuminate\Config\Repository|\Illuminate\Contracts\Foundation\Application|mixed
      */
-    public static function generateKey()
+    public function salt($salt)
     {
-        return random_bytes(config('file-crypter.cipher') === 'AES-128-CBC' ? 16 : 32);
-    }
+        $this->salt = $salt;
 
+        return $this;
+    }
     /**
      * Encrypt the passed file and saves the result in a new file with ".enc" as suffix.
      *
@@ -96,9 +102,8 @@ class FileCrypter
         $sourcePath = $this->getFilePath($sourceFile);
         $destPath = $this->getFilePath($destFile);
 
-
         // Create a new encrypter instance
-        $encrypter = new FileEncrypter($this->key, $this->cipher);
+        $encrypter = new FileEncrypter($this->key, $this->cipherAES, $this->cipherBF, $this->salt);
 
         // If encryption is successful, delete the source file
         if ($encrypter->encrypt($sourcePath, $destPath) && $deleteSource) {
@@ -126,8 +131,8 @@ class FileCrypter
         $this->registerServices();
 
         if (is_null($destFile)) {
-            $destFile = Str::endsWith($sourceFile, '.enc')
-                        ? Str::replaceLast('.enc', '', $sourceFile)
+            $destFile = Str::endsWith($sourceFile, '.pimen')
+                        ? Str::replaceLast('.pimen', '', $sourceFile)
                         : $sourceFile.'.dec';
         }
 
@@ -135,7 +140,7 @@ class FileCrypter
         $destPath = $this->getFilePath($destFile);
 
         // Create a new encrypter instance
-        $encrypter = new FileEncrypter($this->key, $this->cipher);
+        $encrypter = new FileEncrypter($this->key, $this->cipherAES, $this->cipherBF, $this->salt);
 
         // If decryption is successful, delete the source file
         if ($encrypter->decrypt($sourcePath, $destPath) && $deleteSource) {
@@ -157,7 +162,7 @@ class FileCrypter
         $sourcePath = $this->getFilePath($sourceFile);
 
         // Create a new encrypter instance
-        $encrypter = new FileEncrypter($this->key, $this->cipher);
+        $encrypter = new FileEncrypter($this->key, $this->cipherAES, $this->cipherBF, $this->salt);
 
         return $encrypter->decrypt($sourcePath, 'php://output');
     }

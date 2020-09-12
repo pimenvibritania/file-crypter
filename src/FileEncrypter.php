@@ -3,8 +3,12 @@
 namespace pimenvibritania\FileCrypter;
 
 use Exception;
+use Illuminate\Hashing\ArgonHasher;
+use Illuminate\Hashing\HashManager;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use RuntimeException;
+use pimenvibritania\HashStretcher\Hasher;
 
 class FileEncrypter
 {
@@ -26,29 +30,37 @@ class FileEncrypter
      *
      * @var string
      */
-    protected $cipher;
+    protected $cipherAES;
+    protected $cipherBF;
 
     /**
      * Create a new encrypter instance.
      *
      * @param  string  $key
-     * @param  string  $cipher
+     * @param  string  $cipherAES
      * @return void
      *
      * @throws \RuntimeException
      */
-    public function __construct($key, $cipher = 'AES-128-CBC')
+    public function __construct($key, $cipherAES = 'AES-128-CBC', $cipherBF, $salt)
     {
         // If the key starts with "base64:", we will need to decode the key before handing
         // it off to the encrypter. Keys may be base-64 encoded for presentation and we
         // want to make sure to convert them back to the raw bytes before encrypting.
+        $this->salt = $salt;
         if (Str::startsWith($key, 'base64:')) {
             $key = base64_decode(substr($key, 7));
+        } else {
+            $hash = new Hasher();
+            $key = $hash->create($key, $salt);
         }
 
-        if (static::supported($key, $cipher)) {
+        $this->cipherBF = $cipherBF;
+
+        if (static::supported($key, $cipherAES)) {
             $this->key = $key;
-            $this->cipher = $cipher;
+            $this->cipherAES = $cipherAES;
+
         } else {
             throw new RuntimeException('The only supported ciphers are AES-128-CBC and AES-256-CBC with the correct key lengths.');
         }
@@ -58,15 +70,14 @@ class FileEncrypter
      * Determine if the given key and cipher combination is valid.
      *
      * @param  string  $key
-     * @param  string  $cipher
+     * @param  string  $cipherAES
      * @return bool
      */
-    public static function supported($key, $cipher)
+    public static function supported($key, $cipherAES)
     {
         $length = mb_strlen($key, '8bit');
-
-        return ($cipher === 'AES-128-CBC' && $length === 16) ||
-               ($cipher === 'AES-256-CBC' && $length === 32);
+        return ($cipherAES === 'AES-128-CBC' && $length === 16) ||
+               ($cipherAES === 'AES-256-CBC' && $length === 32);
     }
 
     /**
@@ -89,8 +100,13 @@ class FileEncrypter
 
         $i = 0;
         while (! feof($fpIn)) {
+
             $plaintext = fread($fpIn, 16 * self::FILE_ENCRYPTION_BLOCKS);
-            $ciphertext = openssl_encrypt($plaintext, $this->cipher, $this->key, OPENSSL_RAW_DATA, $iv);
+            $hasher = new Hasher();
+            $ivBF = $hasher->joaat($this->salt);
+
+            $bf = openssl_encrypt($plaintext, $this->cipherBF, $this->key, OPENSSL_RAW_DATA, $ivBF);
+            $ciphertext = openssl_encrypt($bf, $this->cipherAES, $this->key, OPENSSL_RAW_DATA, $iv);
 
             // Because Amazon S3 will randomly return smaller sized chunks:
             // Check if the size read from the stream is different than the requested chunk size
@@ -104,11 +120,11 @@ class FileEncrypter
 
             // Use the first 16 bytes of the ciphertext as the next initialization vector
             $iv = substr($ciphertext, 0, 16);
-
             fwrite($fpOut, $ciphertext);
 
             $i++;
         }
+
         fclose($fpIn);
         fclose($fpOut);
 
@@ -129,14 +145,16 @@ class FileEncrypter
 
         // Get the initialzation vector from the beginning of the file
         $iv = fread($fpIn, 16);
+        $hasher = new Hasher();
+        $ivBF = $hasher->joaat($this->salt);
 
         $numberOfChunks = ceil((filesize($sourcePath) - 16) / (16 * (self::FILE_ENCRYPTION_BLOCKS + 1)));
-
         $i = 0;
         while (! feof($fpIn)) {
             // We have to read one block more for decrypting than for encrypting because of the initialization vector
             $ciphertext = fread($fpIn, 16 * (self::FILE_ENCRYPTION_BLOCKS + 1));
-            $plaintext = openssl_decrypt($ciphertext, $this->cipher, $this->key, OPENSSL_RAW_DATA, $iv);
+            $plaintext = openssl_decrypt($ciphertext, $this->cipherAES, $this->key, OPENSSL_RAW_DATA, $iv);
+            $bf = openssl_decrypt($plaintext, $this->cipherBF, $this->key, OPENSSL_RAW_DATA, $ivBF);
 
             // Because Amazon S3 will randomly return smaller sized chunks:
             // Check if the size read from the stream is different than the requested chunk size
@@ -148,13 +166,13 @@ class FileEncrypter
                 continue;
             }
 
-            if ($plaintext === false) {
+            if ($bf === false) {
                 throw new Exception('Decryption failed');
             }
 
             // Get the the first 16 bytes of the ciphertext as the next initialization vector
             $iv = substr($ciphertext, 0, 16);
-            fwrite($fpOut, $plaintext);
+            fwrite($fpOut, $bf);
 
             $i++;
         }
@@ -185,3 +203,4 @@ class FileEncrypter
         return $fpIn;
     }
 }
+

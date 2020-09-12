@@ -3,19 +3,21 @@
 return [
     /*
      * The default key used for all file encryption / decryption
-     * This package will look for a FILE_CRYPTER_KEY in your env file
-     * If no FILE_CRYPTER_KEY is found, then it will use your Laravel APP_KEY
+     * If no AES_KEY / SALT_KEY is found, then it will use your Laravel APP_KEY
      */
-    'key' => env('FILE_CRYPTER_KEY', env('APP_KEY')),
+    'key' => env('AES_KEY', env('APP_KEY')),
+    'salt' => env('SALT_KEY', env('APP_KEY')),
 
     /*
      * The cipher used for encryption.
-     * Supported options are AES-128-CBC and AES-256-CBC
+     * Supported options are AES-128-CBC and AES-256-CBC and BF-EBC
      */
-    'cipher' => 'AES-256-CBC',
-
+    'cipher-aes' => 'AES-256-CBC',
+    'cipher-bf' => 'BF-CBC',
     /*
      * The Storage disk used by default to locate your files.
      */
     'disk' => 'local',
+
+
 ];

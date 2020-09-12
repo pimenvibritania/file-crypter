@@ -1,9 +1,9 @@
 {
     "name": "pimenvibritania/file-crypter",
-    "description": "Encrypt and decrypt any files of any size in your PHP (Laravel) project",
+    "description": "Encrypt and decrypt any files with AES & Blowfish encryption for PHP (Laravel) project",
     "keywords": [
         "laravel", "encrypt", "decrypt", "encryption", "decryption",
-        "cbc", "php", "file", "file-crypter"
+        "cbc", "php", "file", "file-crypter", "aes", "bluefish", "hashing"
     ],
     "homepage": "https://github.com/pimenvibritania/file-crypter",
     "type": "library",
@@ -16,7 +16,8 @@
     ],
     "require": {
         "php": "^7.1",
-        "illuminate/support": "5.8.* || 6.*.* || ^7.0"
+        "illuminate/support": "6.*.* || ^7.0",
+        "pimenvibritania/hash-stretcher": "^1.2.0"
     },
     "require-dev": {
         "orchestra/testbench": "3.8.*",
