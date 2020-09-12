@@ -12,6 +12,6 @@ composer require pimenvibritania/hash-stretcher
 ```
 
 > You can Install this package via composer  :
-> ```bash
-> composer require pimenvibritania/file-crypter
->```
+ ```bash
+ composer require pimenvibritania/file-crypter
+```
