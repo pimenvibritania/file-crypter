@@ -15,12 +15,10 @@
         }
     ],
     "require": {
-        "php": "^7.1",
-        "illuminate/support": "6.*.* || ^7.0",
-        "pimenvibritania/hash-stretcher": "^1.2.0"
+        "php": "^7.4",
+        "illuminate/support": "8.*"
     },
     "require-dev": {
-        "orchestra/testbench": "3.8.*",
         "phpro/grumphp": "^0.22.0"
     },
     "autoload": {
