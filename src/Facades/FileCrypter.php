@@ -3,7 +3,6 @@
 namespace pimenvibritania\FileCrypter\Facades;
 
 use Illuminate\Support\Facades\Facade;
-use phpDocumentor\Reflection\Types\Static_;
 
 /**
  * @method static mixed disk(string $disk)
@@ -14,6 +13,7 @@ use phpDocumentor\Reflection\Types\Static_;
  * @method static mixed decrypt(string $sourceFile, string $destFile = null, $deleteSource = true)
  * @method static mixed decryptCopy(string $sourceFile, string $destFile = null)
  *
+ * @see \pimenvibritania\FileCrypter\FileCrypter
  */
 class FileCrypter extends Facade
 {

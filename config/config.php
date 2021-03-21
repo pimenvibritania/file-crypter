@@ -13,7 +13,6 @@ return [
      * Supported options are AES-128-CBC and AES-256-CBC and BF-EBC
      */
     'cipher-aes' => 'AES-256-CBC',
-    'cipher-bf' => 'BF-CBC',
     /*
      * The Storage disk used by default to locate your files.
      */
